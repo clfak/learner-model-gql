@@ -1660,6 +1660,98 @@ export type PollItemInput = {
   tags?: InputMaybe<Array<Scalars["String"]>>;
 };
 
+/** Temporal granularity of the bucket. */
+export const ProgressOverTimeBucket = {
+  /** Group by day (UTC) */
+  DAY: "DAY",
+  /** Group by month (UTC) */
+  MONTH: "MONTH",
+  /** Group by week (UTC) */
+  WEEK: "WEEK",
+} as const;
+
+export type ProgressOverTimeBucket =
+  (typeof ProgressOverTimeBucket)[keyof typeof ProgressOverTimeBucket];
+export type ProgressOverTimeGroupInput = {
+  /** Temporary bucket (default DAY) */
+  bucket?: ProgressOverTimeBucket;
+  /** Current user identifier */
+  currentUserId?: InputMaybe<Scalars["IntID"]>;
+  /** Domain identifier */
+  domainId: Scalars["IntID"];
+  /** End date of the range (inclusive) */
+  endDate: Scalars["DateTime"];
+  /** Group identifier */
+  groupId: Scalars["IntID"];
+  /** List of valid KC codes */
+  kcCodes: Array<Scalars["String"]>;
+  /** Projects identifier */
+  projectsIds: Array<Scalars["IntID"]>;
+  /** Initial date of the range (inclusive) */
+  startDate: Scalars["DateTime"];
+};
+
+/** Point in the time series */
+export type ProgressOverTimePoint = {
+  __typename?: "ProgressOverTimePoint";
+  /** Bucket start time (UTC) */
+  at: Scalars["DateTime"];
+  /** Average level (BKT) over kcCodes */
+  avgLevel?: Maybe<Scalars["Float"]>;
+  /** Number of KCs actually used */
+  nKcsUsed: Scalars["Int"];
+  /** Solo group. Users who contributed to the average */
+  nUsers?: Maybe<Scalars["Int"]>;
+  /** Latest ModelState.updatedAt used within the bucket */
+  snapshotUpdatedAt?: Maybe<Scalars["DateTime"]>;
+};
+
+export type ProgressOverTimeQueries = {
+  __typename?: "ProgressOverTimeQueries";
+  /**
+   * Group series: latest snapshot per user+bucket and then
+   * average across users.
+   */
+  groupBkt: ProgressOverTimeSeries;
+  /**
+   * User series: the last snapshot per bucket within the range is taken and
+   * avgLevel is calculated over kcCodes.
+   */
+  userBkt: ProgressOverTimeSeries;
+};
+
+export type ProgressOverTimeQueriesgroupBktArgs = {
+  input: ProgressOverTimeGroupInput;
+};
+
+export type ProgressOverTimeQueriesuserBktArgs = {
+  input: ProgressOverTimeUserInput;
+};
+
+/** Time series (includes buckets with no data such as null) */
+export type ProgressOverTimeSeries = {
+  __typename?: "ProgressOverTimeSeries";
+  points: Array<ProgressOverTimePoint>;
+};
+
+/** Input: individual progress series (BKT) */
+export type ProgressOverTimeUserInput = {
+  /** Temporary bucket (default DAY) */
+  bucket?: ProgressOverTimeBucket;
+  /** Domain identifier */
+  domainId: Scalars["IntID"];
+  /** End date of the range (inclusive) */
+  endDate: Scalars["DateTime"];
+  /** List of valid KC codes */
+  kcCodes: Array<Scalars["String"]>;
+  /** Projects identifier */
+  projectsIds: Array<Scalars["IntID"]>;
+  /** Initial date of the range (inclusive) */
+  startDate: Scalars["DateTime"];
+  /** User identifier */
+  userId: Scalars["IntID"];
+};
+
 /** Project entity */
 export type Project = {
   __typename?: "Project";
@@ -1884,6 +1976,12 @@ export type Query = {
   poll?: Maybe<Poll>;
   /** Get all polls */
   polls: Array<Poll>;
+  /**
+   * Progress series (BKT) added by user and group.
+   *
+   * Returns points per bucket (DAY/WEEK/MONTH).
+   */
+  progressOverTime: ProgressOverTimeQueries;
   /**
    * Get specified project by either "id" or "code".
    *
@@ -2505,6 +2603,12 @@ export type ResolversTypes = {
   PollInput: PollInput;
   PollItem: ResolverTypeWrapper<PollItem>;
   PollItemInput: PollItemInput;
+  ProgressOverTimeBucket: ProgressOverTimeBucket;
+  ProgressOverTimeGroupInput: ProgressOverTimeGroupInput;
+  ProgressOverTimePoint: ResolverTypeWrapper<ProgressOverTimePoint>;
+  ProgressOverTimeQueries: ResolverTypeWrapper<ProgressOverTimeQueries>;
+  ProgressOverTimeSeries: ResolverTypeWrapper<ProgressOverTimeSeries>;
+  ProgressOverTimeUserInput: ProgressOverTimeUserInput;
   Project: ResolverTypeWrapper<Project>;
   ProjectActionsFilter: ProjectActionsFilter;
   ProjectContentFilter: ProjectContentFilter;
@@ -2636,6 +2740,11 @@ export type ResolversParentTypes = {
   PollInput: PollInput;
   PollItem: PollItem;
   PollItemInput: PollItemInput;
+  ProgressOverTimeGroupInput: ProgressOverTimeGroupInput;
+  ProgressOverTimePoint: ProgressOverTimePoint;
+  ProgressOverTimeQueries: ProgressOverTimeQueries;
+  ProgressOverTimeSeries: ProgressOverTimeSeries;
+  ProgressOverTimeUserInput: ProgressOverTimeUserInput;
   Project: Project;
   ProjectActionsFilter: ProjectActionsFilter;
   ProjectContentFilter: ProjectContentFilter;
@@ -3695,6 +3804,53 @@ export type PollItemResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ProgressOverTimePointResolvers<
+  ContextType = EZContext,
+  ParentType extends ResolversParentTypes["ProgressOverTimePoint"] = ResolversParentTypes["ProgressOverTimePoint"]
+> = {
+  at?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  avgLevel?: Resolver<Maybe<ResolversTypes["Float"]>, ParentType, ContextType>;
+  nKcsUsed?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  nUsers?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  snapshotUpdatedAt?: Resolver<
+    Maybe<ResolversTypes["DateTime"]>,
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ProgressOverTimeQueriesResolvers<
+  ContextType = EZContext,
+  ParentType extends ResolversParentTypes["ProgressOverTimeQueries"] = ResolversParentTypes["ProgressOverTimeQueries"]
+> = {
+  groupBkt?: Resolver<
+    ResolversTypes["ProgressOverTimeSeries"],
+    ParentType,
+    ContextType,
+    RequireFields<ProgressOverTimeQueriesgroupBktArgs, "input">
+  >;
+  userBkt?: Resolver<
+    ResolversTypes["ProgressOverTimeSeries"],
+    ParentType,
+    ContextType,
+    RequireFields<ProgressOverTimeQueriesuserBktArgs, "input">
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ProgressOverTimeSeriesResolvers<
+  ContextType = EZContext,
+  ParentType extends ResolversParentTypes["ProgressOverTimeSeries"] = ResolversParentTypes["ProgressOverTimeSeries"]
+> = {
+  points?: Resolver<
+    Array<ResolversTypes["ProgressOverTimePoint"]>,
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ProjectResolvers<
   ContextType = EZContext,
   ParentType extends ResolversParentTypes["Project"] = ResolversParentTypes["Project"]
@@ -3860,6 +4016,11 @@ export type QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<QuerypollsArgs, "ids">
+  >;
+  progressOverTime?: Resolver<
+    ResolversTypes["ProgressOverTimeQueries"],
+    ParentType,
+    ContextType
   >;
   project?: Resolver<
     Maybe<ResolversTypes["Project"]>,
@@ -4083,6 +4244,9 @@ export type Resolvers<ContextType = EZContext> = {
   PageInfo?: PageInfoResolvers<ContextType>;
   Poll?: PollResolvers<ContextType>;
   PollItem?: PollItemResolvers<ContextType>;
+  ProgressOverTimePoint?: ProgressOverTimePointResolvers<ContextType>;
+  ProgressOverTimeQueries?: ProgressOverTimeQueriesResolvers<ContextType>;
+  ProgressOverTimeSeries?: ProgressOverTimeSeriesResolvers<ContextType>;
   Project?: ProjectResolvers<ContextType>;
   ProjectsConnection?: ProjectsConnectionResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

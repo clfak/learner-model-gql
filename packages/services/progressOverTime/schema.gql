@@ -1,0 +1,226 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"Pagination Interface"
+interface Connection {
+  "Pagination information"
+  pageInfo: PageInfo!
+}
+
+"""
+Pagination parameters
+
+Forward pagination parameters can't be mixed with Backward pagination parameters simultaneously
+
+first & after => Forward Pagination
+
+last & before => Backward Pagination
+"""
+input CursorConnectionArgs {
+  """
+  Set the minimum boundary
+
+  Use the "endCursor" field of "pageInfo"
+  """
+  after: IntID
+  """
+  Set the maximum boundary
+
+  Use the "startCursor" field of "pageInfo"
+  """
+  before: IntID
+  """
+  Set the limit of nodes to be fetched
+
+  It can't be more than 50
+  """
+  first: NonNegativeInt
+  """
+  Set the limit of nodes to be fetched
+
+  It can't be more than 50
+  """
+  last: NonNegativeInt
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""
+A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/.
+"""
+scalar EmailAddress @specifiedBy(url: "https://www.w3.org/Protocols/rfc822/")
+
+"""
+ID that parses as non-negative integer, serializes to string, and can be passed as string or number
+"""
+scalar IntID
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+  @specifiedBy(
+    url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
+  )
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+  @specifiedBy(
+    url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
+  )
+
+type Mutation {
+  "Returns 'Hello World!'"
+  hello: String!
+}
+
+"Minimum Entity Information"
+interface Node {
+  "Unique numeric identifier"
+  id: IntID!
+}
+
+"""
+Integers that will have a value of 0 or more.
+"""
+scalar NonNegativeInt
+
+"Order ascendingly or descendingly"
+enum ORDER_BY {
+  ASC
+  DESC
+}
+
+"Paginated related information"
+type PageInfo {
+  "Cursor parameter normally used for forward pagination"
+  endCursor: String
+  """
+  Utility field that returns "true" if a next page can be fetched
+  """
+  hasNextPage: Boolean!
+  """
+  Utility field that returns "true" if a previous page can be fetched
+  """
+  hasPreviousPage: Boolean!
+  "Cursor parameter normally used for backward pagination"
+  startCursor: String
+}
+
+"Temporal granularity of the bucket."
+enum ProgressOverTimeBucket {
+  "Group by day (UTC)"
+  DAY
+  "Group by month (UTC)"
+  MONTH
+  "Group by week (UTC)"
+  WEEK
+}
+
+input ProgressOverTimeGroupInput {
+  "Temporary bucket (default DAY)"
+  bucket: ProgressOverTimeBucket! = DAY
+  "Current user identifier"
+  currentUserId: IntID
+  "Domain identifier"
+  domainId: IntID!
+  "End date of the range (inclusive)"
+  endDate: DateTime!
+  "Group identifier"
+  groupId: IntID!
+  "List of valid KC codes"
+  kcCodes: [String!]!
+  "Projects identifier"
+  projectsIds: [IntID!]!
+  "Initial date of the range (inclusive)"
+  startDate: DateTime!
+}
+
+"Point in the time series"
+type ProgressOverTimePoint {
+  "Bucket start time (UTC)"
+  at: DateTime!
+  "Average level (BKT) over kcCodes"
+  avgLevel: Float
+  "Number of KCs actually used"
+  nKcsUsed: Int!
+  "Solo group. Users who contributed to the average"
+  nUsers: Int
+  "Latest ModelState.updatedAt used within the bucket"
+  snapshotUpdatedAt: DateTime
+}
+
+type ProgressOverTimeQueries {
+  """
+  Group series: latest snapshot per user+bucket and then
+  average across users.
+  """
+  groupBkt(input: ProgressOverTimeGroupInput!): ProgressOverTimeSeries!
+  """
+  User series: the last snapshot per bucket within the range is taken and
+  avgLevel is calculated over kcCodes.
+  """
+  userBkt(input: ProgressOverTimeUserInput!): ProgressOverTimeSeries!
+}
+
+"Time series (includes buckets with no data such as null)"
+type ProgressOverTimeSeries {
+  points: [ProgressOverTimePoint!]!
+}
+
+"Input: individual progress series (BKT)"
+input ProgressOverTimeUserInput {
+  "Temporary bucket (default DAY)"
+  bucket: ProgressOverTimeBucket! = DAY
+  "Domain identifier"
+  domainId: IntID!
+  "End date of the range (inclusive)"
+  endDate: DateTime!
+  "List of valid KC codes"
+  kcCodes: [String!]!
+  "Projects identifier"
+  projectsIds: [IntID!]!
+  "Initial date of the range (inclusive)"
+  startDate: DateTime!
+  "User identifier"
+  userId: IntID!
+}
+
+type Query {
+  "Returns 'Hello World!'"
+  hello: String!
+  """
+  Progress series (BKT) added by user and group.
+
+  Returns points per bucket (DAY/WEEK/MONTH).
+  """
+  progressOverTime: ProgressOverTimeQueries!
+}
+
+type Subscription {
+  "Emits 'Hello World1', 'Hello World2', 'Hello World3', 'Hello World4' and 'Hello World5'"
+  hello: String!
+}
+
+"""
+The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+"""
+A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
+"""
+scalar URL
+
+"""
+Represents NULL values
+"""
+scalar Void
