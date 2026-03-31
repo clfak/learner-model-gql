@@ -1,6 +1,5 @@
 import { gql, registerModule } from "../ez";
-import type { EZContext } from "graphql-ez";
-import type { PrismaNS, PrismaClient } from "api-base";
+import type { PrismaNS } from "api-base";
 
 import type {
   Resolvers,
@@ -11,8 +10,6 @@ import type {
 import { addBucket, asBucket, startOfBucket, toKey } from "./utils/bucket";
 import { avgLevelFromBktJson } from "./utils/bktModel";
 import { iterateModelStatesBkt } from "./utils/modelStateIterator";
-
-type Context = EZContext & { prisma: PrismaClient };
 
 export const progressOverTimeModule = registerModule(
   gql`
@@ -45,7 +42,7 @@ export const progressOverTimeModule = registerModule(
       startDate: DateTime!
       "End date of the range (inclusive)"
       endDate: DateTime!
-      "Temporary bucket (default DAY)"
+      "Temporal bucket (default DAY)"
       bucket: ProgressOverTimeBucket! = DAY
       "List of valid KC codes"
       kcCodes: [String!]!
@@ -64,7 +61,7 @@ export const progressOverTimeModule = registerModule(
       startDate: DateTime!
       "End date of the range (inclusive)"
       endDate: DateTime!
-      "Temporary bucket (default DAY)"
+      "Temporal bucket (default DAY)"
       bucket: ProgressOverTimeBucket! = DAY
       "List of valid KC codes"
       kcCodes: [String!]!
@@ -105,7 +102,8 @@ export const progressOverTimeModule = registerModule(
     dirname: import.meta.url,
     resolvers: {
       Query: {
-        progressOverTime() {
+        async progressOverTime(_root, _args, { authorization }) {
+          await authorization.expectUser;
           return {};
         },
       },
@@ -113,7 +111,7 @@ export const progressOverTimeModule = registerModule(
         async userBkt(
           _root,
           { input }: ProgressOverTimeQueriesuserBktArgs,
-          { prisma }: Context
+          { prisma }
         ) {
           const bucket = asBucket(input.bucket);
           const startDate = new Date(input.startDate);
@@ -190,7 +188,7 @@ export const progressOverTimeModule = registerModule(
         async groupBkt(
           _root,
           { input }: ProgressOverTimeQueriesgroupBktArgs,
-          { prisma }: Context
+          { prisma }
         ) {
           const bucket = asBucket(input.bucket);
 
@@ -331,6 +329,6 @@ export const progressOverTimeModule = registerModule(
           return { points };
         },
       },
-    } satisfies Resolvers<Context>,
+    } satisfies Resolvers,
   }
 );

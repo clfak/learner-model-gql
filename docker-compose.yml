@@ -79,7 +79,7 @@ services:
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       AUTH0_CLIENT: ${AUTH0_CLIENT}
       AUTH0_SECRET: ${AUTH0_SECRET}
-    command: pnpm --filter=service-progressovertime -r start
+    command: pnpm --filter=service-progress-over-time -r start
   gateway:
     restart: always
     image: pabloszx/learner-model-gql
