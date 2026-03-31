@@ -1,4 +1,4 @@
-import type { PrismaNS } from "api-base";
+import type { PrismaNS, PrismaClient } from "api-base";
 
 const BATCH_SIZE = 1000;
 
@@ -10,7 +10,7 @@ export type ModelStateRow = {
 };
 
 export async function iterateModelStatesBkt(
-  prisma: any,
+  prisma: PrismaClient,
   where: PrismaNS.ModelStateWhereInput,
   onRow: (row: ModelStateRow) => void | Promise<void>
 ) {
