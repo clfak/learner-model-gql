@@ -1658,7 +1658,7 @@ export const ProgressOverTimeBucket = {
 export type ProgressOverTimeBucket =
   (typeof ProgressOverTimeBucket)[keyof typeof ProgressOverTimeBucket];
 export type ProgressOverTimeGroupInput = {
-  /** Temporary bucket (default DAY) */
+  /** Temporal bucket (default DAY) */
   bucket?: ProgressOverTimeBucket;
   /** Current user identifier */
   currentUserId?: InputMaybe<Scalars["IntID"]>;
@@ -1721,7 +1721,7 @@ export type ProgressOverTimeSeries = {
 
 /** Input: individual progress series (BKT) */
 export type ProgressOverTimeUserInput = {
-  /** Temporary bucket (default DAY) */
+  /** Temporal bucket (default DAY) */
   bucket?: ProgressOverTimeBucket;
   /** Domain identifier */
   domainId: Scalars["IntID"];

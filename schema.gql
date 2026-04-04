@@ -1576,7 +1576,7 @@ enum ProgressOverTimeBucket {
 }
 
 input ProgressOverTimeGroupInput {
-  "Temporary bucket (default DAY)"
+  "Temporal bucket (default DAY)"
   bucket: ProgressOverTimeBucket! = DAY
   "Current user identifier"
   currentUserId: IntID
@@ -1628,7 +1628,7 @@ type ProgressOverTimeSeries {
 
 "Input: individual progress series (BKT)"
 input ProgressOverTimeUserInput {
-  "Temporary bucket (default DAY)"
+  "Temporal bucket (default DAY)"
   bucket: ProgressOverTimeBucket! = DAY
   "Domain identifier"
   domainId: IntID!
