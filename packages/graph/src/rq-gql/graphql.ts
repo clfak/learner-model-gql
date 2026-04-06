@@ -1645,6 +1645,98 @@ export type PollItemInput = {
   tags?: InputMaybe<Array<Scalars["String"]>>;
 };
 
+/** Temporal granularity of the bucket. */
+export const ProgressOverTimeBucket = {
+  /** Group by day (UTC) */
+  Day: "DAY",
+  /** Group by month (UTC) */
+  Month: "MONTH",
+  /** Group by week (UTC) */
+  Week: "WEEK",
+} as const;
+
+export type ProgressOverTimeBucket =
+  (typeof ProgressOverTimeBucket)[keyof typeof ProgressOverTimeBucket];
+export type ProgressOverTimeGroupInput = {
+  /** Temporal bucket (default DAY) */
+  bucket?: ProgressOverTimeBucket;
+  /** Current user identifier */
+  currentUserId?: InputMaybe<Scalars["IntID"]>;
+  /** Domain identifier */
+  domainId: Scalars["IntID"];
+  /** End date of the range (inclusive) */
+  endDate: Scalars["DateTime"];
+  /** Group identifier */
+  groupId: Scalars["IntID"];
+  /** List of valid KC codes */
+  kcCodes: Array<Scalars["String"]>;
+  /** Projects identifier */
+  projectsIds: Array<Scalars["IntID"]>;
+  /** Initial date of the range (inclusive) */
+  startDate: Scalars["DateTime"];
+};
+
+/** Point in the time series */
+export type ProgressOverTimePoint = {
+  __typename?: "ProgressOverTimePoint";
+  /** Bucket start time (UTC) */
+  at: Scalars["DateTime"];
+  /** Average level (BKT) over kcCodes */
+  avgLevel?: Maybe<Scalars["Float"]>;
+  /** Number of KCs actually used */
+  nKcsUsed: Scalars["Int"];
+  /** Solo group. Users who contributed to the average */
+  nUsers?: Maybe<Scalars["Int"]>;
+  /** Latest ModelState.updatedAt used within the bucket */
+  snapshotUpdatedAt?: Maybe<Scalars["DateTime"]>;
+};
+
+export type ProgressOverTimeQueries = {
+  __typename?: "ProgressOverTimeQueries";
+  /**
+   * Group series: latest snapshot per user+bucket and then
+   * average across users.
+   */
+  groupBkt: ProgressOverTimeSeries;
+  /**
+   * User series: the last snapshot per bucket within the range is taken and
+   * avgLevel is calculated over kcCodes.
+   */
+  userBkt: ProgressOverTimeSeries;
+};
+
+export type ProgressOverTimeQueriesGroupBktArgs = {
+  input: ProgressOverTimeGroupInput;
+};
+
+export type ProgressOverTimeQueriesUserBktArgs = {
+  input: ProgressOverTimeUserInput;
+};
+
+/** Time series (includes buckets with no data such as null) */
+export type ProgressOverTimeSeries = {
+  __typename?: "ProgressOverTimeSeries";
+  points: Array<ProgressOverTimePoint>;
+};
+
+/** Input: individual progress series (BKT) */
+export type ProgressOverTimeUserInput = {
+  /** Temporal bucket (default DAY) */
+  bucket?: ProgressOverTimeBucket;
+  /** Domain identifier */
+  domainId: Scalars["IntID"];
+  /** End date of the range (inclusive) */
+  endDate: Scalars["DateTime"];
+  /** List of valid KC codes */
+  kcCodes: Array<Scalars["String"]>;
+  /** Projects identifier */
+  projectsIds: Array<Scalars["IntID"]>;
+  /** Initial date of the range (inclusive) */
+  startDate: Scalars["DateTime"];
+  /** User identifier */
+  userId: Scalars["IntID"];
+};
+
 /** Project entity */
 export type Project = {
   __typename?: "Project";
@@ -1869,6 +1961,12 @@ export type Query = {
   poll?: Maybe<Poll>;
   /** Get all polls */
   polls: Array<Poll>;
+  /**
+   * Progress series (BKT) added by user and group.
+   *
+   * Returns points per bucket (DAY/WEEK/MONTH).
+   */
+  progressOverTime: ProgressOverTimeQueries;
   /**
    * Get specified project by either "id" or "code".
    *

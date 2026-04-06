@@ -8,35 +8,63 @@ schema {
 User-emitted actions related to system, data mainly used for logging and modeling purposes
 """
 type Action {
-  "Arbitrary numeric amount"
+  """
+  Arbitrary numeric amount
+  """
   amount: Float
-  "Related content"
+  """
+  Related content
+  """
   content: Content
-  "Timestamp of the action, set by the database on row creation"
+  """
+  Timestamp of the action, set by the database on row creation
+  """
   createdAt: DateTime!
-  "Arbitrary string content detail"
+  """
+  Arbitrary string content detail
+  """
   detail: String
-  "Arbitrary JSON object data"
+  """
+  Arbitrary JSON object data
+  """
   extra: JSONObject
-  "Arbitrary hint identifier"
+  """
+  Arbitrary hint identifier
+  """
   hintID: ID
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
-  "Related KCs"
+  """
+  Related KCs
+  """
   kcs: [KC!]!
   "Related poll"
   poll: Poll
-  "Arbitrary numeric result"
+  """
+  Arbitrary numeric result
+  """
   result: Float
-  "Arbitrary step identifier"
+  """
+  Arbitrary step identifier
+  """
   stepID: ID
-  "Timestamp of the action, set by the action emitter"
+  """
+  Timestamp of the action, set by the action emitter
+  """
   timestamp: Timestamp!
-  "Related topic"
+  """
+  Related topic
+  """
   topic: Topic
-  "User that emitted the action"
+  """
+  User that emitted the action
+  """
   user: User
-  "Type of action"
+  """
+  Type of action
+  """
   verb: ActionVerb!
 }
 
@@ -116,25 +144,41 @@ Action Verb
 Main action categorization system
 """
 type ActionVerb {
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
-  "Name of the verb"
+  """
+  Name of the verb
+  """
   name: String!
 }
 
-"Paginated ActionsByContent"
+"""
+Paginated ActionsByContent
+"""
 type ActionsByContentConnection implements Connection {
-  "Nodes of the current page"
+  """
+  Nodes of the current page
+  """
   nodes: [AllActionsByContent!]!
-  "Pagination related information"
+  """
+  Pagination related information
+  """
   pageInfo: PageInfo!
 }
 
-"Paginated ActionsByUser"
+"""
+Paginated ActionsByUser
+"""
 type ActionsByUserConnection implements Connection {
-  "Nodes of the current page"
+  """
+  Nodes of the current page
+  """
   nodes: [AllActionsByUser!]!
-  "Pagination related information"
+  """
+  Pagination related information
+  """
   pageInfo: PageInfo!
 }
 
@@ -147,17 +191,29 @@ type ActionsConnection implements Connection {
 }
 
 input ActionsTopicInput {
-  "End interval for conducting the search."
+  """
+  End interval for conducting the search.
+  """
   endDate: DateTime!
-  "Array of group identifiers that will be used to filter the information corresponding to the users of those groups."
+  """
+  Array of group identifiers that will be used to filter the information corresponding to the users of those groups.
+  """
   groupIds: [Int!]
-  "ID of the project."
+  """
+  ID of the project.
+  """
   projectId: Int!
-  "Start interval for conducting the search."
+  """
+  Start interval for conducting the search.
+  """
   startDate: DateTime!
-  "Array of topic IDs where the search will be performed."
+  """
+  Array of topic IDs where the search will be performed.
+  """
   topicsIds: [Int!]
-  "Array of verbs to be used for action search."
+  """
+  Array of verbs to be used for action search.
+  """
   verbNames: [String!]!
 }
 
@@ -569,30 +625,52 @@ input AdminUsersFilter {
 }
 
 type AllActionsByContent {
-  "Actions performed on the content."
+  """
+  Actions performed on the content.
+  """
   actions: [Action!]!
-  "Unique string identifier"
+  """
+  Unique string identifier
+  """
   code: String!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
-  "Arbitrary JSON object data"
+  """
+  Arbitrary JSON object data
+  """
   json: JSONObject!
-  "KCs associated with the content"
+  """
+  KCs associated with the content
+  """
   kcs: [KC!]!
 }
 
 type AllActionsByUser {
-  "Actions performed by user"
+  """
+  Actions performed by user
+  """
   actions: [Action!]!
-  "Date of creation"
+  """
+  Date of creation
+  """
   createdAt: DateTime!
-  "Email Address"
+  """
+  Email Address
+  """
   email: String!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
-  "Model States associated with user"
+  """
+  Model States associated with user
+  """
   modelStates: JSON!
-  "User role"
+  """
+  User role
+  """
   role: String!
 }
 
@@ -748,7 +826,9 @@ type Content {
   createdAt: DateTime!
   "Arbitrary content description"
   description: String!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
   "Arbitrary JSON object data"
   json: JSONObject
@@ -1151,7 +1231,9 @@ type KC {
   createdAt: DateTime!
   "Domain associated with the KC"
   domain: Domain!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
   "Human readable identifier"
   label: String!
@@ -1483,6 +1565,85 @@ input PollItemInput {
   tags: [String!]
 }
 
+"Temporal granularity of the bucket."
+enum ProgressOverTimeBucket {
+  "Group by day (UTC)"
+  DAY
+  "Group by month (UTC)"
+  MONTH
+  "Group by week (UTC)"
+  WEEK
+}
+
+input ProgressOverTimeGroupInput {
+  "Temporal bucket (default DAY)"
+  bucket: ProgressOverTimeBucket! = DAY
+  "Current user identifier"
+  currentUserId: IntID
+  "Domain identifier"
+  domainId: IntID!
+  "End date of the range (inclusive)"
+  endDate: DateTime!
+  "Group identifier"
+  groupId: IntID!
+  "List of valid KC codes"
+  kcCodes: [String!]!
+  "Projects identifier"
+  projectsIds: [IntID!]!
+  "Initial date of the range (inclusive)"
+  startDate: DateTime!
+}
+
+"Point in the time series"
+type ProgressOverTimePoint {
+  "Bucket start time (UTC)"
+  at: DateTime!
+  "Average level (BKT) over kcCodes"
+  avgLevel: Float
+  "Number of KCs actually used"
+  nKcsUsed: Int!
+  "Solo group. Users who contributed to the average"
+  nUsers: Int
+  "Latest ModelState.updatedAt used within the bucket"
+  snapshotUpdatedAt: DateTime
+}
+
+type ProgressOverTimeQueries {
+  """
+  Group series: latest snapshot per user+bucket and then
+  average across users.
+  """
+  groupBkt(input: ProgressOverTimeGroupInput!): ProgressOverTimeSeries!
+  """
+  User series: the last snapshot per bucket within the range is taken and
+  avgLevel is calculated over kcCodes.
+  """
+  userBkt(input: ProgressOverTimeUserInput!): ProgressOverTimeSeries!
+}
+
+"Time series (includes buckets with no data such as null)"
+type ProgressOverTimeSeries {
+  points: [ProgressOverTimePoint!]!
+}
+
+"Input: individual progress series (BKT)"
+input ProgressOverTimeUserInput {
+  "Temporal bucket (default DAY)"
+  bucket: ProgressOverTimeBucket! = DAY
+  "Domain identifier"
+  domainId: IntID!
+  "End date of the range (inclusive)"
+  endDate: DateTime!
+  "List of valid KC codes"
+  kcCodes: [String!]!
+  "Projects identifier"
+  projectsIds: [IntID!]!
+  "Initial date of the range (inclusive)"
+  startDate: DateTime!
+  "User identifier"
+  userId: IntID!
+}
+
 "Project entity"
 type Project {
   """
@@ -1737,6 +1898,12 @@ type Query {
   """
   polls(ids: [IntID!]!): [Poll!]!
   """
+  Progress series (BKT) added by user and group.
+
+  Returns points per bucket (DAY/WEEK/MONTH).
+  """
+  progressOverTime: ProgressOverTimeQueries!
+  """
   Get specified project by either "id" or "code".
 
   - If user is not authenticated it will always return NULL.
@@ -1816,7 +1983,9 @@ type Topic {
   content: [Content!]!
   "Date of creation"
   createdAt: DateTime!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
   "KCs associated with the topic"
   kcs: [KC!]!
@@ -2015,7 +2184,9 @@ type User {
   emailAliases: [String!]
   "Groups associated with the user"
   groups: [Group!]!
-  "Unique numeric identifier"
+  """
+  Unique numeric identifier
+  """
   id: IntID!
   "Date of latest user access"
   lastOnline: DateTime

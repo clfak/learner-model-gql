@@ -782,6 +782,15 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../../db
 
+  packages/services/progressOverTime:
+    dependencies:
+      api-base:
+        specifier: workspace:^0.0.1
+        version: link:../../api-base
+      db:
+        specifier: workspace:^0.0.1
+        version: link:../../db
+
   packages/services/projects:
     dependencies:
       api-base:
