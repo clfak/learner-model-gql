@@ -44,6 +44,10 @@ export const subSchemas = [
     GetSchema(import("../../services/contentSelection/src/app")),
   ],
   ["actionstopic", GetSchema(import("../../services/actionsTopic/src/app"))],
+  [
+    "progressOverTime",
+    GetSchema(import("../../services/progressOverTime/src/app")),
+  ],
 ] as const;
 
 export const schema = lexicographicSortSchema(
